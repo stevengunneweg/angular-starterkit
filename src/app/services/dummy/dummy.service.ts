@@ -7,7 +7,7 @@ import { tap } from 'rxjs/operators';
 import { environment } from '@environments/environment';
 import { DummyInterface } from '@store/dummy/dummy.interface';
 
-export const DUMMY_KEY = makeStateKey('dummyState');
+export const DUMMY_KEY = makeStateKey<DummyInterface>('dummyState');
 
 /**
  * DummyService provides a service to use CRUD actions

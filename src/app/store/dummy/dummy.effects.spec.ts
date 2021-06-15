@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { TransferState } from '@angular/platform-browser';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Action } from '@ngrx/store';
-import { cold, hot } from 'jasmine-marbles';
+import { getTestScheduler, hot } from 'jasmine-marbles';
 import { Observable, of, throwError } from 'rxjs';
 
 import { DummyService } from '@services/dummy/dummy.service';
@@ -39,29 +39,37 @@ describe('Effects: Dummy effects', () => {
 		it('should dispatch action on load', () => {
 			spyOn(service, 'getDummyData').and.returnValue(of(mockDummy));
 
-			const action = dummyActions.Load();
-			const completion = dummyActions.LoadSuccess({ entity: mockDummy });
+			const scheduler = getTestScheduler();
+			scheduler.run((helpers) => {
+				const action = dummyActions.Load();
+				const completion = dummyActions.LoadSuccess({
+					entity: mockDummy,
+				});
 
-			actions$ = hot('-a', { a: action });
-			const expected = cold('-c', { c: completion });
-
-			expect(effects.loadDummy$).toBeObservable(expected);
+				actions$ = hot('-a', { a: action });
+				helpers
+					.expectObservable(effects.loadDummy$)
+					.toBe('-c', { c: completion });
+			});
 		});
 
 		it('should dispatch action when failed', () => {
 			spyOn(service, 'getDummyData').and.returnValue(
-				throwError({ status: 404 }),
+				throwError(() => ({ status: 404 })),
 			);
 
-			const action = dummyActions.Load();
-			const completion = dummyActions.LoadFail({
-				errorMessage: 'global.something-went-wrong',
+			const scheduler = getTestScheduler();
+			scheduler.run((helpers) => {
+				const action = dummyActions.Load();
+				const completion = dummyActions.LoadFail({
+					errorMessage: 'global.something-went-wrong',
+				});
+
+				actions$ = hot('-a', { a: action });
+				helpers
+					.expectObservable(effects.loadDummy$)
+					.toBe('-c', { c: completion });
 			});
-
-			actions$ = hot('-a', { a: action });
-			const expected = cold('-c', { c: completion });
-
-			expect(effects.loadDummy$).toBeObservable(expected);
 		});
 	});
 });

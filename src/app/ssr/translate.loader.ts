@@ -21,7 +21,7 @@ export class TranslateUniversalLoader implements TranslateLoader {
 	 * @return      Observable
 	 */
 	public getTranslation(lang: string): Observable<any> {
-		return Observable.create((observer: any) => {
+		return new Observable((observer: any) => {
 			observer.next(
 				JSON.parse(
 					fs.readFileSync(
